@@ -15,14 +15,14 @@ Responsabilidades:
 - Agregar nuevas URLs
 """
 
-FRONTIER_FILE = "frontier.txt"
-VISITED_FILE = "visited.txt"
+FRONTIER_FILE = "frontier.csv"
+VISITED_FILE = "visited.csv"
 
 # FRONTIER
 
 def load_frontier():
     """
-    Carga las URLs pendientes desde frontier.txt
+    Carga las URLs pendientes desde frontier.csv
     """
 
     try:

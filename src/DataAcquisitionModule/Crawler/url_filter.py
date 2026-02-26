@@ -13,7 +13,7 @@ Responsabilidades:
 from urllib.parse import urlparse
 
 # Cambiar el dominio
-DOMAIN = "bbc.com"
+DOMAIN = "lanacion.com"
 
 
 # Extensiones no descargar
