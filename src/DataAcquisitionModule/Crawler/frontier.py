@@ -3,10 +3,11 @@ frontier.py
 
 Módulo encargado de manejar:
 
-- frontier.txt (URLs pendientes de visitar)
-- visited.txt (URLs ya visitadas)
+- frontier.csv
+- visited.csv
 
 Responsabilidades:
+
 - Cargar frontier
 - Guardar frontier
 - Cargar visited
@@ -14,98 +15,96 @@ Responsabilidades:
 - Obtener siguiente URL
 - Agregar nuevas URLs
 """
+import os
 
-FRONTIER_FILE = "frontier.txt"
-VISITED_FILE = "visited.txt"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# FRONTIER
+FRONTIER_FILE = os.path.join(BASE_DIR, "frontier.csv")
+VISITED_FILE = os.path.join(BASE_DIR, "visited.csv")
+SEEDS_FILE = os.path.join(BASE_DIR, "seeds.csv")
 
-def load_frontier():
-    """
-    Carga las URLs pendientes desde frontier.txt
-    """
+# SEEDS
+
+def load_seeds():
 
     try:
-        with open(FRONTIER_FILE, "r", encoding="utf-8") as f:
-            return [line.strip() for line in f if line.strip()]
+        with open(SEEDS_FILE, "r", encoding="utf-8") as f:
+            return [
+                line.strip()
+                for line in f
+                if line.strip()
+            ]
 
     except FileNotFoundError:
         return []
 
 
-def save_frontier(frontier):
-    """
-    Guarda la lista de URLs pendientes
-    """
+# FRONTIER
+def load_frontier():
+    try:
+        with open(FRONTIER_FILE, "r", encoding="utf-8") as f:
+            urls = [line.strip() for line in f if line.strip()]
+    except FileNotFoundError:
+        urls = []
 
+    if not urls:
+        urls = load_seeds()
+
+    frontier_list = [(url, 0) for url in urls]
+    frontier_set = set(urls)
+    return frontier_list, frontier_set
+
+
+def save_frontier(frontier_list):
     with open(FRONTIER_FILE, "w", encoding="utf-8") as f:
-
-        for url in frontier:
+        for url in frontier_list:
             f.write(url + "\n")
 
 
-def add_to_frontier(frontier, url):
-    """
-    Agrega una URL a frontier si no existe
-    """
 
-    if url not in frontier:
-        frontier.append(url)
+def add_to_frontier(frontier_list, frontier_set, url, depth):
+    if url not in frontier_set:
+        frontier_list.append((url, depth))
+        frontier_set.add(url)
 
 
-def get_next_url(frontier):
-    """
-    Obtiene la siguiente URL del frontier
-    """
-
-    if frontier:
-        return frontier.pop(0)
-
+def get_next_url(frontier_list, frontier_set):
+    if frontier_list:
+        url, depth = frontier_list.pop(0)
+        frontier_set.remove(url)
+        return url, depth
     return None
 
 
 # VISITED
 
 def load_visited():
-    """
-    Carga las URLs visitadas
-    """
-
     try:
         with open(VISITED_FILE, "r", encoding="utf-8") as f:
-            return set(line.strip() for line in f if line.strip())
+            return set(
+                line.strip()
+                for line in f
+                if line.strip()
+            )
 
     except FileNotFoundError:
         return set()
 
 
 def save_visited(visited):
-    """
-    Guarda las URLs visitadas
-    """
-
     with open(VISITED_FILE, "w", encoding="utf-8") as f:
-
         for url in visited:
             f.write(url + "\n")
 
 
 def add_to_visited(visited, url):
-    """
-    Marca una URL como visitada
-    """
-
     visited.add(url)
 
 
 # UTILIDADES
 
-def already_seen(url, frontier, visited):
-    """
-    Verifica si una URL ya fue vista
-    """
-
-    if url in frontier:
+def already_seen(url, frontier_set, visited):
+    if url in frontier_set:
         return True
 
     if url in visited:
