@@ -18,6 +18,8 @@ import time
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 
+MAX_DEPTH = 3 
+
 from src.DataAcquisitionModule.Crawler.frontier import (
     load_frontier,
     save_frontier,
@@ -31,82 +33,79 @@ from src.DataAcquisitionModule.Crawler.frontier import (
 
 from src.DataAcquisitionModule.Crawler.url_filter import is_valid_url
 
+
 # CONFIGURACION
-DELAY = 1   # segundos entre requests
 
+DELAY = 1
 
-# DESCARGA DE PAGINAS
-
-def fetch(url):
+def fetch(url, max_retries=3):
     """
     Descarga una página web.
     Devuelve el HTML o None si falla.
     """
 
-    try:
+    for attempt in range(1, max_retries + 1):
 
-        print("\nDownloading:", url)
+        try:
+            print(f"\nDownloading ({attempt}/{max_retries}): {url}")
 
-        response = requests.get(url, timeout=5)
+            response = requests.get(url, timeout=8)
 
-        if response.status_code == 200:
-            return response.text
+            if response.status_code == 200:
+                response.encoding = response.apparent_encoding
+                return response.text
 
-        print("Status error:", response.status_code)
+            print("Status error:", response.status_code)
 
-    except Exception as e:
+        except requests.exceptions.Timeout:
+            print("Timeout:", url)
 
-        print("Error downloading:", url)
+        except requests.exceptions.ConnectionError:
+            print("Connection error:", url)
 
+        except Exception as e:
+            print("Error downloading:", url, e)
+
+        if attempt < max_retries:
+            print("Reintentando...")
+            time.sleep(2) 
+
+    print("Fallo al descargar después de", max_retries, "intentos:", url)
     return None
 
 
 # EXTRACCION DE LINKS
 
 def extract_links(html, base_url):
-    """
-    Extrae enlaces desde el HTML.
-    Convierte URLs relativas a absolutas.
-    """
 
     soup = BeautifulSoup(html, "html.parser")
-
     links = set()
 
     for a in soup.find_all("a", href=True):
-
         link = urljoin(base_url, a["href"])
-
         if link.startswith("http"):
             links.add(link)
 
     return list(links)
 
 
-
 # CRAWLER PRINCIPAL
 
 def crawl(max_pages=50):
-    """
-    Ejecuta el crawler.
 
-    max_pages limita cuántas páginas visitar
-    (evita crawls infinitos)
-    """
-
-    frontier = load_frontier()
+    frontier_list, frontier_set = load_frontier()
 
     visited = load_visited()
 
     print("Crawler iniciado")
-    print("Frontier:", len(frontier))
+    print("Frontier:", len(frontier_set))
     print("Visited:", len(visited))
 
     pages_crawled = 0
 
-    while frontier and pages_crawled < max_pages:
+    while frontier_list and pages_crawled < max_pages:
 
-        url = get_next_url(frontier)
+        url, depth = get_next_url(frontier_list, frontier_set)
 
         if not url:
             break
@@ -115,36 +114,28 @@ def crawl(max_pages=50):
             continue
 
         html = fetch(url)
-
         if not html:
             continue
 
-        # Extraer enlaces
-        links = extract_links(html, url)
+        print(f"Crawling: {url} | Profundidad: {depth}")
 
+        links = extract_links(html, url)
         print("Links encontrados:", len(links))
 
-        # Agregar nuevos links
-        for link in links:
+        # solo agregar enlaces si no superan la profundidad
+        if depth < MAX_DEPTH:
+            for link in links:
+                if not already_seen(link, frontier_set, visited):
+                    if is_valid_url(link):
+                        add_to_frontier(frontier_list, frontier_set, link, depth + 1)
 
-            if not already_seen(link, frontier, visited):
-
-                if is_valid_url(link):
-
-                    add_to_frontier(frontier, link)
-
-        # Marcar visitado
         add_to_visited(visited, url)
 
-        # Guardar archivos
-        save_frontier(frontier)
+        save_frontier([u for u,_ in frontier_list])  # guardamos solo URLs, no profundidad
         save_visited(visited)
 
         pages_crawled += 1
-
-        print("Pages crawled:", pages_crawled)
-        print("Frontier size:", len(frontier))
+        print("Paginas crawleadas:", pages_crawled)
+        print("Tamano del frontied:", len(frontier_set))
 
         time.sleep(DELAY)
-
-    print("\nCrawler terminado")

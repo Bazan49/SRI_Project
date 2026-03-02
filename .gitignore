@@ -208,5 +208,5 @@ __marimo__/
 
 
 # Frontier y visited
-frontier.txt
-visited.txt
+frontier.csv
+visited.csv
