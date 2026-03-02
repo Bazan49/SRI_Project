@@ -20,7 +20,7 @@ from urllib.parse import urljoin
 
 MAX_DEPTH = 3 
 
-from src.DataAcquisitionModule.Crawler.frontier import (
+from frontier import (
     load_frontier,
     save_frontier,
     load_visited,
@@ -31,7 +31,7 @@ from src.DataAcquisitionModule.Crawler.frontier import (
     already_seen
 )
 
-from src.DataAcquisitionModule.Crawler.url_filter import is_valid_url
+from url_filter import is_valid_url
 
 
 # CONFIGURACION
