@@ -26,7 +26,7 @@ class TeleMundoScraper(BaseScraper):
     def extract(self, url, html):
 
         article = Article(url, language="es")
-        article.download()
+        article.html = html
         article.parse()
 
         title = article.title
@@ -41,9 +41,4 @@ class TeleMundoScraper(BaseScraper):
             "date": date
         }
     
-if __name__ == "__main__":
-    scraper =  TeleMundoScraper()
-    
-    url = "https://www.telemundo.com/noticias/noticias-telemundo/economia/cinco-senales-de-que-la-economia-no-esta-precisamente-rugiendo-como-as-rcna262307"
-    result = scraper.process_url(url, "telemundo")
     
