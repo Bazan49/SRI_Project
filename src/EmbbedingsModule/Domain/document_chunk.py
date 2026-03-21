@@ -10,6 +10,7 @@ class ChunkMetadata:
     url: str
     title: str
     publication_date: Optional[datetime] = None
+    authors: Optional[list] = None          # Lista de autores
     chunk_type: str = "paragraph"          # "paragraph", "subchunk", "title"
     chunk_number: int = 0
     estimated_tokens: int = 0
@@ -20,7 +21,8 @@ class ChunkMetadata:
             "source": self.source,
             "url": self.url,
             "title": self.title,
-            "publication_date": self.publication_date,
+            "publication_date": self.publication_date.isoformat() if self.publication_date else None,
+            "authors": self.authors if self.authors else [],
             "chunk_type": self.chunk_type,
             "chunk_number": self.chunk_number,
             "estimated_tokens": self.estimated_tokens,
