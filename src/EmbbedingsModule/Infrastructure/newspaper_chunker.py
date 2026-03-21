@@ -1,7 +1,7 @@
 from typing import List
 from DataAcquisitionModule.Scraper.scrapedDocument import ScrapedDocument
-from .chunker import Chunker
-from .document_chunk import Chunk, ChunkMetadata
+from ..Domain.chunker import Chunker
+from ..Domain.document_chunk import Chunk, ChunkMetadata
 import re
 
 class NewspaperChunker(Chunker):
@@ -30,6 +30,7 @@ class NewspaperChunker(Chunker):
                     url=document.url,
                     title=document.title,
                     publication_date=document.date,
+                    authors=document.authors,
                     chunk_type="paragraph",
                     chunk_number=chunk_idx,
                     estimated_tokens=tokens
@@ -45,6 +46,7 @@ class NewspaperChunker(Chunker):
                         url=document.url,
                         title=document.title,
                         publication_date=document.date,
+                        authors=document.authors,
                         chunk_type="paragraph_subchunk",
                         chunk_number=chunk_idx + i,
                         estimated_tokens=self._estimate_tokens(sub)
