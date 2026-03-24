@@ -31,10 +31,12 @@ class LMIRScoreFunction:
     - Verificación matemática unitaria
     """
     
-    def __init__(self, mu: float = 1000.0):
+    def __init__(self, mu: float = 100.0):
         """
         Args:
-            mu: Parámetro de suavizado Dirichlet (default: 1000)
+            mu: Parámetro de suavizado Dirichlet (default: 100)
+               Valores menores (100-500) = más discriminatorio
+               Valores mayores (1000+) = más suavizado uniforme
         """
         self.mu = mu
         self._initialized = False

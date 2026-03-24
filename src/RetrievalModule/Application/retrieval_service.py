@@ -4,16 +4,17 @@ from RetrievalModule.Application.lmir_retriever import LMIRScoreFunction
 from RetrievalModule.Domain.retrieval_result import RetrievalResult
 from RetrievalModule.Domain.retriever_repository import RetrieverRepository
 from RetrievalModule.Domain.stats_repository import StatsRepository
-from RetrievalModule.Infrastructure.elasticsearch_query_preprocesor import ElasticsearchQueryPreprocessor
+from RetrievalModule.Domain.query_preprocessor import QueryPreprocessor
 
 
 class RetrievalAppService():
-    def __init__(self, repository: RetrieverRepository, stats_repository: StatsRepository, scorer: LMIRScoreFunction, preprocessor: ElasticsearchQueryPreprocessor, top_candidates: int = 200):
+    def __init__(self, repository: RetrieverRepository, stats_repository: StatsRepository, scorer: LMIRScoreFunction, preprocessor: QueryPreprocessor, top_candidates: int = 200):
         self.repository = repository
-        self.stats_repo: stats_repository # type: ignore
+        self.stats_repo = stats_repository
         self.scorer = scorer
         self.preprocessor = preprocessor
         self.top_candidates = top_candidates
+        self._stats_loaded = False
     
     async def _ensure_stats_loaded(self):
         """Carga las estadísticas en el scorer la primera vez."""
@@ -27,7 +28,7 @@ class RetrievalAppService():
         
     async def retrieve(self, query: str, k: int = 10) -> List[Dict[str, Any]]: 
         await self._ensure_stats_loaded()
-        query_tokens = self.preprocessor.preprocess(query)
+        query_tokens = await self.preprocessor.preprocess(query)
         if not query_tokens:
             return []
 
@@ -44,14 +45,22 @@ class RetrievalAppService():
             scored.append((doc, score))
 
         scored.sort(key=lambda x: x[1], reverse=True)
+        
+        # Normalizar scores para mejor legibilidad
+        max_score = scored[0][1] if scored else 0
+        min_score = scored[-1][1] if scored else 0
+        score_range = max_score - min_score if max_score != min_score else 1
+        
         results = []
         for doc, score in scored[:k]:
+            # Normalizar a 0-100
+            normalized_score = 100 * (score - min_score) / score_range if score_range > 0 else 0
             snippet = doc.content[:200] + "..." if len(doc.content) > 200 else doc.content
             results.append(RetrievalResult(
                 url=doc.url,
                 title=doc.title,
                 content=doc.content,
-                score=score,
+                score=normalized_score,  # Score normalizado
                 source=doc.source,
                 snippet=snippet
             ).to_dict())

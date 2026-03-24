@@ -1,3 +1,3 @@
-from RetrievalModule.Application.lmir_retriever import LMIRRetriever
+from RetrievalModule.Application.lmir_retriever import LMIRScoreFunction
 
-__all__ = ["LMIRRetriever"]
+__all__ = ["LMIRScoreFunction"]
