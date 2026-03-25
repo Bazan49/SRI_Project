@@ -1,4 +1,29 @@
-# RetrievalModule - Arquitectura y flujo
+## Modelo de recuperación: Language Model con suavizado Dirichlet
+
+El módulo recuperador implementa un **modelo probabilístico de lenguaje (Language Model for Information Retrieval)** basado en la aproximación *query likelihood*. La puntuación de un documento \(D\) para una consulta \(Q\) se calcula como:
+
+\[
+P(Q|D) = \prod_{w \in Q} P(w|D)
+\]
+
+donde \(P(w|D)\) se estima mediante suavizado de Dirichlet:
+
+\[
+P(w|D) = \frac{\text{tf}(w,D) + \mu \cdot P(w|C)}{|D| + \mu}
+\]
+
+siendo \(\text{tf}(w,D)\) la frecuencia del término en el documento, \(|D|\) la longitud del documento, \(P(w|C)\) la probabilidad del término en toda la colección y \(\mu\) el parámetro de suavizado.
+
+**Referencias bibliográficas:**
+
+- **Ponte, J. M., & Croft, W. B. (1998).** *A language modeling approach to information retrieval.* In Proceedings of the 21st annual international ACM SIGIR conference on Research and development in information retrieval (pp. 275–281). ACM. [http://sigir.hosting.acm.org/wp-content/uploads/2017/06/p202.pdf](http://sigir.hosting.acm.org/wp-content/uploads/2017/06/p202.pdf)  
+  (Definición fundamental del modelo de lenguaje aplicado a recuperación de información.)
+
+- **Zhai, C., & Lafferty, J. (2001).** *A study of smoothing methods for language models applied to ad hoc information retrieval.* In Proceedings of the 24th annual international ACM SIGIR conference on Research and development in information retrieval (pp. 334–342). ACM. [https://sigir.org/wp-content/uploads/2017/06/p268.pdf](https://sigir.org/wp-content/uploads/2017/06/p268.pdf)  
+  (Justificación del suavizado de Dirichlet y su efecto en el rendimiento.)
+
+---
+# Arquitectura y flujo
 
 ## 🧠 Panorama general
 `RetrievalModule` es el módulo responsable de recuperar documentos relevantes para una query del usuario. Está diseñado con capas claras (Domain + Infrastructure + Application) y usa ElasticSearch + LMIR (Language Model for Information Retrieval) por ahora.
