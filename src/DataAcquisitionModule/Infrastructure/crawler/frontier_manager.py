@@ -16,23 +16,23 @@ Responsabilidades:
 - Agregar nuevas URLs
 """
 import os
-
-
+from pathlib import Path
 
 class FrontierManager:
 
     def __init__(self):
 
-        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-        self.FRONTIER_FILE = os.path.join(BASE_DIR, "frontier.csv")
-        self.VISITED_FILE = os.path.join(BASE_DIR, "visited.csv")
-        self.SEEDS_FILE = os.path.join(BASE_DIR, "seeds.csv")
+        BASE_DIR = Path(__file__).parent          
+        DATA_DIR = BASE_DIR / "data"             
+        DATA_DIR.mkdir(exist_ok=True)            
+        
+        self.FRONTIER_FILE = DATA_DIR / "frontier.csv"
+        self.VISITED_FILE = DATA_DIR / "visited.csv"
+        self.SEEDS_FILE = DATA_DIR / "seeds.csv"
 
         # Estructuras en memoria
         self.frontier_list, self.frontier_set = self.load_frontier()
         self.visited = self.load_visited()
-
 
     # SEEDS
 
