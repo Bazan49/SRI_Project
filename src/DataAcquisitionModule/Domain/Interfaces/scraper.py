@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from DataAcquisitionModule.Domain.Entities import scrapedDocument
 
-class Scraper(ABC):
+class IScraper(ABC):
 
     @abstractmethod
     def extract(self, url: str, html: str) -> scrapedDocument:
