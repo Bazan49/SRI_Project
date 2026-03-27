@@ -1,11 +1,12 @@
 from urllib.parse import urlparse
-from cubadebate_scraper import CubadebateScraper
-from base_scraper import BaseScraper
-from telemundo_scraper import TeleMundoScraper
+from DataAcquisitionModule.Infrastructure.scraper.cubadebate_scraper import CubadebateScraper
+from DataAcquisitionModule.Infrastructure.scraper.base_scraper import BaseScraper
+from DataAcquisitionModule.Infrastructure.scraper.telemundo_scraper import TeleMundoScraper
 
 class ScraperFactory:
 
-    def get_scraper(self, url):
+    @staticmethod
+    def get_scraper(url):
         # Extraer el dominio
         source = urlparse(url).netloc.lower()  # ej: 'www.cubadebate.cu'
 

@@ -1,4 +1,4 @@
-from sympy import re
+import re
 from DataAcquisitionModule.Infrastructure.scraper.base_scraper import BaseScraper
 
 class TeleMundoScraper(BaseScraper):

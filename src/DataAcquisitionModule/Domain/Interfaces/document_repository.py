@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-class DocumentRepository(ABC):
+class IDocumentRepository(ABC):
 
     @abstractmethod
     def save(self, document):

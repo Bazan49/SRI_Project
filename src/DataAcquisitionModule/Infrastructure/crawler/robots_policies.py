@@ -2,8 +2,6 @@ from urllib.robotparser import RobotFileParser
 from urllib.parse import urlparse
 import time
 
-from DataAcquisitionModule.Crawler.robots import TTL_SECONDS
-
 class RobotsManager:
     """
     Clase para manejar reglas de robots.txt con cache y TTL.
