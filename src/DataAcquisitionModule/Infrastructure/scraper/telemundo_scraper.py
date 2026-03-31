@@ -5,7 +5,7 @@ class TeleMundoScraper(BaseScraper):
     
     """Scraper específico para TeleMundo, extiende BaseScraper para manejar casos particulares de este sitio"""
 
-    def extract_authors(self, article):
+    def extract_authors(self, article, soup=None):
 
         """Extrae los autores de artículos de TeleMundo buscando patrones comunes en el texto"""
 

@@ -15,7 +15,9 @@ class JSONLRepository(IDocumentRepository):
             "source": document.source,
             "url": document.url,
             "title": document.title,
-            "content": document.content
+            "authors": document.authors,
+            "published_date": document.date.isoformat() if document.date else None,
+            "content": document.content,
         })
 
         if len(self.buffer) >= self.batch_size:

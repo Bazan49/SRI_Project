@@ -1,5 +1,6 @@
 import re
 from urllib.parse import urlparse, urlunparse
+from bs4 import BeautifulSoup
 from newspaper import Article
 from DataAcquisitionModule.Domain.Entities import scrapedDocument
 from DataAcquisitionModule.Domain.Entities.scrapedDocument import ScrapedDocument
@@ -17,14 +18,25 @@ class BaseScraper(IScraper):
         source = self.get_source(url_normalized)
         article = self.build_article(url, html)
 
+        # Validar que sea un artículo real (no una página de categoría, por ejemplo)
+        soup = BeautifulSoup(article.html, "html.parser")
+        og_type = soup.find('meta', {'property': 'og:type'})
+        if og_type and og_type.get('content') != 'article':
+            return None
+
+        # Extraer contenido y validar longitud mínima
+        content = self.extract_content(article, soup)
+        if not content or len(content.strip()) < 500:
+            return None
+
         document = ScrapedDocument(
                 source=source,
                 url=url,
                 url_normalized=url_normalized,
-                title=self.extract_title(article),
-                content=self.extract_content(article),
-                authors=self.extract_authors(article),
-                date=self.extract_date(article),
+                title=self.extract_title(article, soup),
+                content=self.extract_content(article, soup),
+                authors=self.extract_authors(article, soup),
+                date=self.extract_date(article, soup),
             )
         
         return document
@@ -48,18 +60,25 @@ class BaseScraper(IScraper):
         return urlunparse(clean)
     
     def clean_text(self, text):
-        text = re.sub(r"\s+", " ", text)
-        return text.strip()
+        # 1. Normaliza saltos de línea (por si hay \r\n o múltiples \n)
+        text = re.sub(r'\r\n?', '\n', text)
+        
+        # 2. Reemplaza múltiples espacios dentro de una línea por uno solo
+        lines = text.split('\n')
+        cleaned_lines = [re.sub(r'\s+', ' ', line).strip() for line in lines]
+        
+        # 3. Une las líneas, conservando saltos de línea solo si no están vacías
+        return '\n'.join([line for line in cleaned_lines if line])
 
-    def extract_title(self, article):
+    def extract_title(self, article, soup=None):
         return article.title
 
-    def extract_content(self, article):
+    def extract_content(self, article, soup=None):
         return self.clean_text(article.text)
 
-    def extract_authors(self, article):
+    def extract_authors(self, article, soup=None):
         return article.authors
     
-    def extract_date(self, article):
+    def extract_date(self, article, soup=None):
         return article.publish_date
 
