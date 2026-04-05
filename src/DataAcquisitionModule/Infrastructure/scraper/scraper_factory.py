@@ -6,13 +6,14 @@ from DataAcquisitionModule.Infrastructure.scraper.base_scraper import BaseScrape
 from DataAcquisitionModule.Infrastructure.scraper.presidencia_scraper import PresidenciaScraper
 from DataAcquisitionModule.Infrastructure.scraper.telemundo_scraper import TeleMundoScraper
 from DataAcquisitionModule.Infrastructure.scraper.telesur_scraper import TeleSurScraper
+from DataAcquisitionModule.Infrastructure.scraper.la_nacion_scraper import LaNacionScraper
 
 class ScraperFactory:
 
     @staticmethod
     def get_scraper(url):
         # Extraer el dominio
-        source = urlparse(url).netloc.lower()  # ej: 'www.cubadebate.cu'
+        source = urlparse(url).netloc.lower()  
 
         # Diccionario de mapping source → scraper
         scrapers = {
@@ -28,6 +29,8 @@ class ScraperFactory:
             "www.presidencia.gob.cu": PresidenciaScraper,
             "telesurtv.net": TeleSurScraper,
             "www.telesurtv.net": TeleSurScraper,
+            "lanacion.com.ar": LaNacionScraper,
+            "www.lanacion.com.ar": LaNacionScraper
         }
 
         # Devolver scraper adecuado o BaseScraper por defecto
